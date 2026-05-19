@@ -2,7 +2,7 @@
 
 [![Latest Stable Version](https://poser.pugx.org/donatj/simplecalendar/version)](https://packagist.org/packages/donatj/simplecalendar)
 [![License](https://poser.pugx.org/donatj/simplecalendar/license)](https://packagist.org/packages/donatj/simplecalendar)
-[![ci.yml](https://github.com/donatj/SimpleCalendar/actions/workflows/ci.yml/badge.svg?)](https://github.com/donatj/SimpleCalendar/actions/workflows/ci.yml)
+[![ci.yml](https://github.com/donatj/SimpleCalendar/actions/workflows/ci.yml/badge.svg)](https://github.com/donatj/SimpleCalendar/actions/workflows/ci.yml)
 
 
 A very simple, easy to use PHP calendar rendering class.
@@ -55,7 +55,7 @@ echo $calendar->render();
 
 ## Documentation
 
-### Class: \donatj\SimpleCalendar
+### Class: donatj\SimpleCalendar
 
 Simple Calendar
 
