@@ -15,7 +15,7 @@
 		"donatj/drop": "^1.1",
 		"friendsofphp/php-cs-fixer": "^3.3",
 		"phpstan/phpstan": "^1.10",
-		"phpunit/phpunit": "*",
+		"phpunit/phpunit": "~8|~9",
 		"squizlabs/php_codesniffer": "^3.7"
 	},
 	"authors"    : [
