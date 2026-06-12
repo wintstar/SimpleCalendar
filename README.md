@@ -25,9 +25,9 @@ composer require 'donatj/simplecalendar'
 ```php
 <?php
 
-require '../vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
-echo '<link rel="stylesheet" href="../src/css/SimpleCalendar.css" />';
+echo '<link rel="stylesheet" href="vendor/donatj/simplecalendar/src/css/SimpleCalendar.css" />';
 
 $calendar = new donatj\SimpleCalendar('June 2010');
 
@@ -37,16 +37,16 @@ echo $calendar->render();
 
 ```php
 <?php
-require '../vendor/autoload.php';
 
-echo '<link rel="stylesheet" href="../src/css/SimpleCalendar.css" />';
+require __DIR__ . '/vendor/autoload.php';
+
+echo '<link rel="stylesheet" href="vendor/donatj/simplecalendar/src/css/SimpleCalendar.css" />';;
 
 $calendar = new donatj\SimpleCalendar;
 
+$calendar->setLanguages('en');
 $calendar->setStartOfWeek('Sunday');
 $calendar->addDailyHtml('Sample Event', 'today', 'tomorrow');
-
-$calendar->setWeekDayNames([ 'Sun', 'Mon', 'Tu', 'W', 'Th', 'F', 'Sa' ]);
 $calendar->setStartOfWeek('Monday');
 
 echo $calendar->render();
@@ -131,15 +131,21 @@ rendering of Today.
 
 ---
 
-#### Method: SimpleCalendar->setWeekDayNames
+#### Method: SimpleCalendar->setLanguages
 
 ```php
-function setWeekDayNames([ ?array $weekDayNames = null]) : void
+function setLanguages( ?string $locale = 'en', ?bool $short_week_name = true ) : void
 ```
+
+Translate text string with the locale `$locale` language file. Languages file store `vendor/donatj/simplecalendar/src/language`
+
+Week names `$short_week_name` display short or long. 
+true => short, bool => long. Default set `bool`
 
 ##### Parameters:
 
-- ***string[]*** | ***null*** `$weekDayNames`
+- ***string*** `$locale`
+- ***bool*** `$short_week_name`
 
 ---
 
