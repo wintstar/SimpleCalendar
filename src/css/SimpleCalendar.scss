@@ -3,6 +3,13 @@ table.SimpleCalendar {
 	font-family: Arial;
 	border-collapse: collapse;
 
+	caption {
+    	font-size: 1.5em;
+    	font-weight: bold;
+    	padding: 8px 0;
+    	margin: 8px;
+	}
+
 	th {
 		background: #C9E9F0;
 		color: #0092B4;
