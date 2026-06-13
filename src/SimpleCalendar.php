@@ -12,30 +12,29 @@ namespace donatj;
 class SimpleCalendar {
 
 	/**
+	 * Array of options
+	 *
+	 * @var array
+	 */
+	public $options;
+
+	/**
 	 * Array of Week Day Names
 	 *
 	 * @var string[]|null
 	 */
 	private $weekDayNames;
 
-	/** @var \DateTimeInterface */
-	private $now;
-
-	/** @var \DateTimeInterface|null */
-	private $today;
-
-	/** @var array<string,string> */
-	private $classes = [
-		'calendar'     => 'SimpleCalendar',
-		'leading_day'  => 'SCprefix',
-		'trailing_day' => 'SCsuffix',
-		'today'        => 'today',
-		'event'        => 'event',
-		'events'       => 'events',
-	];
+	/**
+	 * Array of languages string
+	 *
+	 * @var array
+	 */
+	public $lang;
 
 	/** @var array<int, array<int, array<int, array<int, string>>>> */
 	private $dailyHtml = [];
+
 	/** @var int */
 	private $offset = 0;
 
@@ -46,20 +45,10 @@ class SimpleCalendar {
 	 * @see setDate
 	 * @see setToday
 	 */
-	public function __construct( $calendarDate = null, $today = null ) {
-		$this->setDate($calendarDate);
-		$this->setToday($today);
-	}
+	public function __construct( array $options = [] ) {
+		$this->setOptions($options);
 
-	/**
-	 * Sets the date for the calendar.
-	 *
-	 * @param \DateTimeInterface|int|string|null $date DateTimeInterface or Date string parsed by strtotime for the
-	 *                                                 calendar date. If null set to current timestamp.
-	 * @throws \Exception
-	 */
-	public function setDate( $date = null ) : void {
-		$this->now = $this->parseDate($date) ?: new \DateTimeImmutable;
+		$this->setStartOfWeek($this->options['calendarWeekStart']);
 	}
 
 	/**
@@ -83,57 +72,50 @@ class SimpleCalendar {
 	}
 
 	/**
-	 * Sets the class names used in the calendar
-	 *
-	 * ```php
-	 * [
-	 *    'calendar'     => 'SimpleCalendar',
-	 *    'leading_day'  => 'SCprefix',
-	 *    'trailing_day' => 'SCsuffix',
-	 *    'today'        => 'today',
-	 *    'event'        => 'event',
-	 *    'events'       => 'events',
-	 * ]
-	 * ```
-	 *
-	 * @param array<string, string> $classes Map of element to class names used by the calendar.
-	 */
-	public function setCalendarClasses( array $classes ) : void {
-		foreach( $classes as $key => $value ) {
-			if( !isset($this->classes[$key]) ) {
-				throw new \InvalidArgumentException("class '{$key}' not supported");
-			}
-
-			$this->classes[$key] = $value;
-		}
-	}
-
-	/**
 	 * Sets "today"'s date. Defaults to today.
 	 *
 	 * @param \DateTimeInterface|false|int|string|null $today `null` will default to today, `false` will disable the
 	 *                                                        rendering of Today.
 	 * @throws \Exception
 	 */
-	public function setToday( $today = null ) : void {
+	public function setToday( $today = null ) : null|object {
 		if( $today === false ) {
-			$this->today = null;
+			return null;
 		} elseif( $today === null ) {
-			$this->today = new \DateTimeImmutable;
+			return new \DateTimeImmutable;
 		} else {
-			$this->today = $this->parseDate($today);
+			return $this->parseDate($today);
 		}
 	}
 
 	/**
 	 * @param string[]|null $weekDayNames
 	 */
-	public function setWeekDayNames( ?array $weekDayNames = null ) : void {
-		if( is_array($weekDayNames) && count($weekDayNames) !== 7 ) {
-			throw new \InvalidArgumentException('week array must have exactly 7 values');
+	public function setWeekDayNames() : void {
+		if ($this->options['shortWeekname'] == true)
+		{
+			$weekDayNames = array(
+				$this->lang['datetime']['Sun'], 
+				$this->lang['datetime']['Mon'], 
+				$this->lang['datetime']['Tue'], 
+				$this->lang['datetime']['Wed'], 
+				$this->lang['datetime']['Thu'],
+				$this->lang['datetime']['Fri'], 
+				$this->lang['datetime']['Sat']
+			);
+		} else {
+			$weekDayNames = array(
+				$this->lang['datetime']['Sunday'], 
+				$this->lang['datetime']['Monday'], 
+				$this->lang['datetime']['Tuesday'], 
+				$this->lang['datetime']['Wednesday'], 
+				$this->lang['datetime']['Thursday'],
+				$this->lang['datetime']['Friday'], 
+				$this->lang['datetime']['Saturday']
+			);
 		}
 
-		$this->weekDayNames = $weekDayNames ? array_values($weekDayNames) : null;
+		$this->weekDayNames = $weekDayNames;
 	}
 
 	/**
@@ -211,29 +193,16 @@ class SimpleCalendar {
 	}
 
 	/**
-	 * Returns/Outputs the Calendar
-	 *
-	 * @param bool $echo Whether to echo resulting calendar
-	 * @return string HTML of the Calendar
-	 * @deprecated Use `render()` method instead.
-	 */
-	public function show( bool $echo = true ) : string {
-		$out = $this->render();
-		if( $echo ) {
-			echo $out;
-		}
-
-		return $out;
-	}
-
-	/**
 	 * Returns the generated Calendar
 	 */
 	public function render() : string {
-		$now   = getdate($this->now->getTimestamp());
+		// translated week names
+		$this->setWeekDayNames();
+
+		$now   = getdate($this->options['now']->getTimestamp());
 		$today = [ 'mday' => -1, 'mon' => -1, 'year' => -1 ];
-		if( $this->today !== null ) {
-			$today = getdate($this->today->getTimestamp());
+		if( $this->options['today'] !== null ) {
+			$today = getdate($this->options['today']->getTimestamp());
 		}
 
 		$daysOfWeek = $this->weekdays();
@@ -246,7 +215,7 @@ class SimpleCalendar {
 		$daysInMonth  = cal_days_in_month(CAL_GREGORIAN, $now['mon'], $now['year']);
 
 		$out = <<<TAG
-<table cellpadding="0" cellspacing="0" class="{$this->classes['calendar']}"><thead><tr>
+<table cellpadding="0" cellspacing="0" class="{$this->options['classes']['calendar']}"><thead><tr>
 TAG;
 
 		foreach( $daysOfWeek as $dayName ) {
@@ -262,7 +231,7 @@ TAG;
 		$weekDayIndex = ($weekDayIndex + 7) % 7;
 
 		$out .= str_repeat(<<<TAG
-<td class="{$this->classes['leading_day']}">&nbsp;</td>
+<td class="{$this->options['classes']['leading_day']}">&nbsp;</td>
 TAG
 			, $weekDayIndex);
 
@@ -271,13 +240,13 @@ TAG
 			$date = (new \DateTimeImmutable)->setDate($now['year'], $now['mon'], $i);
 
 			$isToday = false;
-			if( $this->today !== null ) {
+			if( $this->options['today'] !== null ) {
 				$isToday = $i == $today['mday']
 					&& $today['mon'] == $date->format('n')
 					&& $today['year'] == $date->format('Y');
 			}
 
-			$out .= '<td' . ($isToday ? ' class="' . $this->classes['today'] . '"' : '') . '>';
+			$out .= '<td' . ($isToday ? ' class="' . $this->options['classes']['today'] . '"' : '') . '>';
 
 			$out .= sprintf('<time datetime="%s">%d</time>', $date->format('Y-m-d'), $i);
 
@@ -287,9 +256,9 @@ TAG
 			}
 
 			if( is_array($dailyHTML) ) {
-				$out .= '<div class="' . $this->classes['events'] . '">';
+				$out .= '<div class="' . $this->options['classes']['events'] . '">';
 				foreach( $dailyHTML as $dHtml ) {
-					$out .= sprintf('<div class="%s">%s</div>', $this->classes['event'], $dHtml);
+					$out .= sprintf('<div class="%s">%s</div>', $this->options['classes']['event'], $dHtml);
 				}
 
 				$out .= '</div>';
@@ -306,7 +275,7 @@ TAG
 		}
 
 		if( $count !== 1 ) {
-			$out .= str_repeat('<td class="' . $this->classes['trailing_day'] . '">&nbsp;</td>', 8 - $count) . '</tr>';
+			$out .= str_repeat('<td class="' . $this->options['classes']['trailing_day'] . '">&nbsp;</td>', 8 - $count) . '</tr>';
 		}
 
 		$out .= "\n</tbody></table>\n";
@@ -346,4 +315,104 @@ TAG
 		return $wDays;
 	}
 
+	/**
+	 * ranslate text to user lang
+	 * 
+	 * @param string $local Language code
+	 * @return array
+	 */
+	private function setLanguages($locale): void
+	{
+		$lang = array();
+		$lang_path = __DIR__ . DIRECTORY_SEPARATOR . 'language' . DIRECTORY_SEPARATOR;
+		$ang_name = file_exists($lang_path . 'calendar_' . $this->options['locale'] . '.php') ? $this->options['locale'] : 'en';
+
+		$include_result = include $lang_path . 'calendar_' . $ang_name . '.php';
+
+		if ($include_result === false)
+		{
+			throw new \InvalidArgumentException('Language file ' . $lang_file . 'couldn\'t be opened.');
+		}
+
+
+		$this->lang = $lang;
+	}
+
+	
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    /**
+     * Required for backward compatibility.
+     *
+     * @deprecated
+     */
+    public function getArgs(): array
+    {
+        return $this->getOptions();
+    }
+
+    public function setOptions($options = array()): void
+    {
+        $defaultOptions = [
+			'calendarTimezone'  => 'UTC',
+			'calendarWeekStart' => 0,
+            'calendarDate' 		=> null,
+            'calendarToday' 	=> null,
+			'calenderLang' 		=> 'en',
+            'shortWeekname' 	=> true,
+			'cssClass'          => array(
+				'calendar'    	    => 'SimpleCalendar',
+				'leading_day'  	    => 'SCprefix',
+				'trailing_day' 	    => 'SCsuffix',
+				'today'        	    => 'today',
+				'event'        	    => 'event',
+				'events'       	    => 'events',
+			)
+        ];
+
+        $options = array_replace($defaultOptions, $options);
+
+        $this->options = $this->sanitizeOptions($options);
+    }
+
+    /**
+     * Performs sanity checks.
+     *
+     * @param array $options Arguments
+     *
+     * @return array Sanitized arguments
+     */
+    protected function sanitizeOptions(array $options): array
+    {
+		date_default_timezone_set($options['calendarTimezone']);
+
+		$options['now'] = $this->parseDate($options['calendarDate']) ?: new \DateTimeImmutable;
+		$options['today'] = $this->setToday($options['calendarToday']);
+
+		foreach( $options['cssClass'] as $key => $value ) {
+			if( !isset($options['cssClass'][$key]) ) {
+				throw new \InvalidArgumentException("class '{$key}' not supported");
+			}
+
+			$options['classes'][$key] = $value;
+		}
+
+		$lang = array();
+		$lang_path = __DIR__ . DIRECTORY_SEPARATOR . 'language' . DIRECTORY_SEPARATOR;
+		$ang_name = file_exists($lang_path . 'calendar_' . $options['calenderLang'] . '.php') ? $options['calenderLang'] : 'en';
+ 
+		$include_result = include $lang_path . 'calendar_' . $ang_name . '.php';
+
+		if ($include_result === false)
+		{
+			throw new \InvalidArgumentException('Language file ' . $lang_file . 'couldn\'t be opened.');
+		}
+
+		$this->lang = $lang;
+
+        return $options;
+    }
 }
