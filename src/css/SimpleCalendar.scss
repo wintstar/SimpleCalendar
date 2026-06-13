@@ -1,11 +1,17 @@
-
 table.SimpleCalendar {
 	font-family: Arial;
 	border-collapse: collapse;
 
+	caption {
+		font-size: 1.5em;
+		font-weight: bold;
+		padding: 8px 0;
+		margin: 8px;
+	}
+
 	th {
-		background: #C9E9F0;
-		color: #0092B4;
+		background: #c9e9f0;
+		color: #0092b4;
 		font-size: 11px;
 		padding: 3px;
 		border: 1px solid #bbb;
@@ -13,11 +19,9 @@ table.SimpleCalendar {
 	}
 
 	tbody {
-
 		td {
-
 			time {
-				font-size: .7em;
+				font-size: 0.7em;
 				display: block;
 				background: white;
 				padding: 2px;
@@ -25,34 +29,53 @@ table.SimpleCalendar {
 				font-weight: bold;
 			}
 
-			vertical-align: top;	
+			vertical-align: top;
 			width: 90px;
-			height: 90px;;
-			border: 1px solid #bbb;	
+			height: 90px;
+			border: 1px solid #bbb;
 			background: rgb(230, 230, 230);
 
-			&.SCsuffix, &.SCprefix {
+			&.SCsuffix,
+			&.SCprefix {
 				background: white;
 			}
 
 			div.event {
-
 				color: #355;
-				font-size: .65em;
+				font-size: 0.65em;
 				padding: 5px;
 				line-height: 1em;
 				border-bottom: 1px solid #bbb;
 				background: rgb(133, 133, 133);
 				color: white;
-
 			}
-
 		}
 
 		td.today {
 			background: rgb(210, 210, 210);
 		}
-
 	}
+}
 
+time span.week,
+time span.date {
+	padding: 2px;
+}
+
+time span.week {
+	float: left;
+	margin: 2px;
+}
+
+time span.date {
+	float: right;
+	margin: 2px;
+}
+
+.clear {
+	display: block;
+	clear: both;
+	font-size: 1px;
+	line-height: 1px;
+	background: transparent;
 }
