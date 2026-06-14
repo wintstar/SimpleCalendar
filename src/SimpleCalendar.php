@@ -168,10 +168,33 @@ class SimpleCalendar {
 
 		$working = (new \DateTimeImmutable)->setTimestamp($start->getTimestamp());
 
+		$count_days = $start->diff($end);
+
 		do {
 			$tDate = getdate($working->getTimestamp());
 
-			$this->dailyHtml[$tDate['year']][$tDate['mon']][$tDate['mday']][$htmlCount] = $html;
+			if ($count_days->days > 0)
+			{
+				if ($start->format('Ynj') == ($tDate['year'].$tDate['mon'].$tDate['mday']))
+				{
+					if ($start->format('N') != $this->offset)
+					{
+						$this->dailyHtml[$tDate['year']][$tDate['mon']][$tDate['mday']][$htmlCount] = $html;
+					}
+				}
+				elseif ($tDate['wday'] == $this->offset)
+				{
+					$this->dailyHtml[$tDate['year']][$tDate['mon']][$tDate['mday']][$htmlCount] = $html;
+				}
+				else
+				{
+					$this->dailyHtml[$tDate['year']][$tDate['mon']][$tDate['mday']][$htmlCount] = '&emsp;';
+				}
+			}
+			else
+			{
+				$this->dailyHtml[$tDate['year']][$tDate['mon']][$tDate['mday']][$htmlCount] = $html;
+			}
 
 			$working = $working->add(new \DateInterval('P1D'));
 		} while( $working->getTimestamp() < $end->getTimestamp() + 1 );
