@@ -24,6 +24,22 @@ class SimpleCalendar {
 	/** @var \DateTimeInterface|null */
 	private $today;
 
+	/**
+	 * Array of languages string
+	 *
+	 * @var array
+	 */
+	public $lang;
+
+	/**
+	 * Short or long week names 
+	 * true = short, long = false
+	 * default true 
+	 *
+	 * @var bool
+	 */
+	public $short_week_name;
+
 	/** @var array<string,string> */
 	private $classes = [
 		'calendar'     => 'SimpleCalendar',
@@ -49,6 +65,8 @@ class SimpleCalendar {
 	public function __construct( $calendarDate = null, $today = null ) {
 		$this->setDate($calendarDate);
 		$this->setToday($today);
+		// set the default language
+		$this->setLanguages();
 	}
 
 	/**
@@ -128,12 +146,32 @@ class SimpleCalendar {
 	/**
 	 * @param string[]|null $weekDayNames
 	 */
-	public function setWeekDayNames( ?array $weekDayNames = null ) : void {
-		if( is_array($weekDayNames) && count($weekDayNames) !== 7 ) {
-			throw new \InvalidArgumentException('week array must have exactly 7 values');
+	public function setWeekDayNames() : void {
+
+		if ($this->short_week_name == true)
+		{
+			$weekDayNames = array(
+				$this->lang['datetime']['Sun'], 
+				$this->lang['datetime']['Mon'], 
+				$this->lang['datetime']['Tue'], 
+				$this->lang['datetime']['Wed'], 
+				$this->lang['datetime']['Thu'],
+				$this->lang['datetime']['Fri'], 
+				$this->lang['datetime']['Sat']
+			);
+		} else {
+			$weekDayNames = array(
+				$this->lang['datetime']['Sunday'], 
+				$this->lang['datetime']['Monday'], 
+				$this->lang['datetime']['Tuesday'], 
+				$this->lang['datetime']['Wednesday'], 
+				$this->lang['datetime']['Thursday'],
+				$this->lang['datetime']['Friday'], 
+				$this->lang['datetime']['Saturday']
+			);
 		}
 
-		$this->weekDayNames = $weekDayNames ? array_values($weekDayNames) : null;
+		$this->weekDayNames = $weekDayNames;
 	}
 
 	/**
@@ -242,6 +280,9 @@ class SimpleCalendar {
 	 * Returns the generated Calendar
 	 */
 	public function render() : string {
+		// translated week names
+		$this->setWeekDayNames();
+
 		$now   = getdate($this->now->getTimestamp());
 		$today = [ 'mday' => -1, 'mon' => -1, 'year' => -1 ];
 		if( $this->today !== null ) {
@@ -358,4 +399,27 @@ TAG
 		return $wDays;
 	}
 
+	/**
+	 * Translate text to user lang
+	 * 
+	 * return array
+	 * 
+	 * @param 
+	 */
+	public function setLanguages( ?string $locale = 'en', ?bool $short_week_name = true ): void
+	{
+		$lang = array();
+		$lang_path = __DIR__ . DIRECTORY_SEPARATOR . 'language' . DIRECTORY_SEPARATOR;
+		$ang_name = file_exists($lang_path . 'calendar_' . $locale . '.php') ? $locale : 'en';
+ 
+		$include_result = include $lang_path . 'calendar_' . $ang_name . '.php';
+
+		if ($include_result === false)
+		{
+			throw new \InvalidArgumentException('Language file ' . $lang_file . 'couldn\'t be opened.');
+		}
+
+		$this->lang = $lang;
+		$this->short_week_name = $short_week_name;
+	}
 }
