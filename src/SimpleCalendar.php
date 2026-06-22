@@ -173,27 +173,14 @@ class SimpleCalendar {
 		do {
 			$tDate = getdate($working->getTimestamp());
 
-			
-
-			if ($count_days == 1)
-			{
+			if ($count_days == 1) {
 				$this->dailyHtml[$tDate['year']][$tDate['mon']][$tDate['mday']][$htmlCount] = $html;
-			}
-			else
-			{
-				if ($start->format('Y-n-j') == ($tDate['year'] . '-' . $tDate['mon'] . '-' . $tDate['mday']))
-				{
-					if ($start->format('N') != $this->offset)
-					{
-						$this->dailyHtml[$tDate['year']][$tDate['mon']][$tDate['mday']][$htmlCount] = $html;
-					}
-				}
-				elseif ($tDate['wday'] == $this->offset)
-				{
+			} else {
+				if ($start->format('Y-n-j') == ($tDate['year'] . '-' . $tDate['mon'] . '-' . $tDate['mday'])) {
 					$this->dailyHtml[$tDate['year']][$tDate['mon']][$tDate['mday']][$htmlCount] = $html;
-				}
-				else
-				{
+				} elseif ($tDate['wday'] == $this->offset) {
+					$this->dailyHtml[$tDate['year']][$tDate['mon']][$tDate['mday']][$htmlCount] = $html;
+				} else {
 					$this->dailyHtml[$tDate['year']][$tDate['mon']][$tDate['mday']][$htmlCount] = '&emsp;';
 				}
 			}
